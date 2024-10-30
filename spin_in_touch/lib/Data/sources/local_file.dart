@@ -25,9 +25,7 @@ class LocalFileJSONParserImpl implements LocalFileJSONParser {
         jsonFileStringContents = await jsonFile.readAsString();
       }
       var decodedJSON = jsonDecode(jsonFileStringContents);
-      print(decodedJSON);
       SpinnerList spinnerList = SpinnerList.fromJson(decodedJSON);
-      print(spinnerList);
       return spinnerList;
     } catch (exception) {
       print(exception);
