@@ -27,7 +27,7 @@ class SpinnerAppView extends StatelessWidget {
     return MaterialApp(
       title: 'Spinner',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        brightness: Brightness.dark,
         useMaterial3: true,
       ),
       home: Scaffold(body: Center(child:  SpinnerWidget())),
