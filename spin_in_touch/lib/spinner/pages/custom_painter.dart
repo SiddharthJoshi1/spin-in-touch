@@ -9,6 +9,7 @@ class PieSlicePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // draw circle
     Paint defaultPaint = Paint();
+    defaultPaint.strokeCap = StrokeCap.round;
 
     Rect rect = Rect.fromCenter(
         center: size.center(Offset.zero),
@@ -25,7 +26,8 @@ class PieSlicePainter extends CustomPainter {
     double startAngle = 0;
     for (var index = 0; index < numberOfSections; index++) {
       paint.color =
-          Color((index * 0.1  * 0xFFFFFF).toInt()).withOpacity(1.0);
+          Color(((Random().nextDouble()) * 0xFFFFFF).toInt()).withOpacity(1.0);
+      
 
       if (index != 0) {
         startAngle = difference * index;
