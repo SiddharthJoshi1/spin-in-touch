@@ -22,16 +22,14 @@ class PieSlicePainter extends CustomPainter {
   void _drawPieSections(
       Canvas canvas, Rect rect, int numberOfSections, Paint paint) {
     var difference = (2 * pi) / numberOfSections;
-
     double startAngle = 0;
     for (var index = 0; index < numberOfSections; index++) {
       paint.color =
-          Color(((Random().nextDouble()) * 0xFFFFFF).toInt()).withOpacity(1.0);
-      
-
+          Color((index * 0.1 * 0xFFFFFF).toInt()).withOpacity(1.0);
       if (index != 0) {
         startAngle = difference * index;
       }
+      print("For index $index the angles are start: $startAngle and end: ${startAngle + difference} ");
       canvas.drawArc(rect, startAngle, difference, true, paint);
     }
   }
