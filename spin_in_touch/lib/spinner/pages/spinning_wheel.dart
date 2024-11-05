@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+
 import 'custom_painter.dart';
 
 class Segement {
@@ -34,17 +35,34 @@ class SpinningWheel extends StatefulWidget {
 }
 
 class _SpinningWheelState extends State<SpinningWheel>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   double angleForSpin = 0;
   double speed = 0.1;
   final double radiansFor360 = 360 * (pi / 180);
   Key repaintKey = Key(Random().nextDouble().toString());
   bool isSpinning = false;
   Ticker? _ticker;
-
+  late AnimationController _controller;
+  late Animation<double> _widthAnimation;
   @override
   void initState() {
     // TODO: implement initState
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+    );
+
+    // Define the animation with the curve 'easeInOut'
+    _widthAnimation = Tween<double>(begin: 0, end: radiansFor360 * 2).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _controller.addListener(() {
+      angleForSpin = _controller.value;
+      if (_controller.status == AnimationStatus.completed) {
+        calculateClosestToCenter();
+        print('completed');
+      }
+    });
 
     super.initState();
   }
@@ -67,22 +85,33 @@ class _SpinningWheelState extends State<SpinningWheel>
             color: Colors.red,
           )),
           SizedBox(height: 10),
-          Transform.rotate(
-              angle: angleForSpin,
-              child: RepaintBoundary(
-                key: repaintKey,
-                  child: CustomPaint(
-                size: const Size(600, 600),
-                painter: PieSlicePainter(),
-                // ),
-              ))),
+          SizedBox(
+            width: MediaQuery.sizeOf(context).width,
+            height: MediaQuery.sizeOf(context).width,
+            child: AnimatedBuilder(
+              builder: (context, child) {
+                return Transform.rotate(
+                    angle: _widthAnimation.value,
+                    child: RepaintBoundary(
+                        key: repaintKey,
+                        child: CustomPaint(
+                          size: const Size(600, 600),
+                          painter: PieSlicePainter(),
+                          // ),
+                        )));
+              },
+              animation: _widthAnimation,
+            ),
+          ),
           SizedBox(height: 30),
           TextButton(
               onPressed: () {
                 setState(() {
-                   angleForSpin = 0;
+                  angleForSpin = 0;
                 });
-                spinWheel();
+                // spinWheel();
+                _controller.reset();
+                _controller.forward();
               },
               child: const Text(
                 "Press to Spin",
@@ -102,10 +131,11 @@ class _SpinningWheelState extends State<SpinningWheel>
     // so create a min max list
     for (var pieceIndex = 0; pieceIndex < numberOfPieces; pieceIndex++) {
       if (pieceIndex == 0) {
-        segements.add(Segement(index: pieceIndex, startRadians: 0, endRadians: difference));
+        segements.add(Segement(
+            index: pieceIndex, startRadians: 0, endRadians: difference));
       } else {
         segements.add(Segement(
-          index: pieceIndex,
+            index: pieceIndex,
             startRadians: difference * pieceIndex,
             endRadians: difference * (pieceIndex + 1)));
       }
@@ -114,7 +144,7 @@ class _SpinningWheelState extends State<SpinningWheel>
     // so if angle spun final was 22 radians
     // do degrees / 360 and take modulo from that to then add to min and max of segements
     print(angleForSpin);
-    double radiansToIncreaseEachSegmentBy = angleForSpin % radiansFor360 ;
+    double radiansToIncreaseEachSegmentBy = angleForSpin % radiansFor360;
     print(radiansToIncreaseEachSegmentBy);
     List<SegementDifference> segementDifferences = [];
     for (var segement in segements) {
@@ -127,9 +157,10 @@ class _SpinningWheelState extends State<SpinningWheel>
       if (segement.endRadians > radiansFor360) {
         segement.endRadians -= radiansFor360;
       }
-      print(
-          "segment starts at ${segement.startRadians} and ends at ${segement.endRadians}");
+      // print(
+      //     "segment starts at ${segement.startRadians} and ends at ${segement.endRadians}");
     }
+    // print('radiansFor360 $radiansFor360');
     Segement? segementThatWon = segements.firstWhere((segement) {
       if (segement.startRadians < segement.endRadians) {
         return segement.startRadians <= radiansFor360 &&
@@ -149,39 +180,23 @@ class _SpinningWheelState extends State<SpinningWheel>
     if (!isSpinning) {
       isSpinning = true;
       _ticker = createTicker((duration) {
+        angleForSpin += speed;
         setState(() {
           print(angleForSpin);
           //simplfy this function to make it more maintainable and changeable
-          if (duration.compareTo(Duration(milliseconds: 400)) == 0) {
+          if (duration.compareTo(Duration(milliseconds: 1000)) < 0) {
             speed = 0.2;
           }
-          if (duration.compareTo(Duration(milliseconds: 500)) == 0) {
-            speed = 0.4;
-          }
-          if (duration.compareTo(Duration(milliseconds: 600)) == 0) {
-            speed = 0.6;
-          }
-          if (duration.compareTo(Duration(milliseconds: 700)) == 0) {
-            speed = 0.8;
-          }
-          if (duration.compareTo(Duration(milliseconds: 800)) == 0) {
-            speed = 0.6;
-          }
-          if (duration.compareTo(Duration(milliseconds: 900)) == 0) {
-            speed = 0.4;
-          }
-          if (duration.compareTo(Duration(milliseconds: 1000)) == 0) {
-            speed = 0.2;
-          }
-          if (duration.compareTo(Duration(milliseconds: 1100)) == 0 ||
-              duration.compareTo(Duration(milliseconds: 1100)) > 0) {
+
+          if (duration.compareTo(Duration(milliseconds: 2000)) == 0 ||
+              duration.compareTo(Duration(milliseconds: 2000)) > 0) {
             speed = 0;
             _ticker!.stop();
             calculateClosestToCenter();
             _ticker!.dispose();
             isSpinning = false;
           }
-          angleForSpin += speed;
+
           // print(angleForSpin);
           // print(duration);
         });
