@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -24,14 +23,31 @@ class PieSlicePainter extends CustomPainter {
     var difference = (2 * pi) / numberOfSections;
     double startAngle = 0;
     for (var index = 0; index < numberOfSections; index++) {
-      paint.color =
-          Color((index * 0.1 * 0xFFFFFF).toInt()).withOpacity(1.0);
+      paint.color = Color((index * 0.1 * 0xFFFFFF).toInt()).withOpacity(1.0);
       if (index != 0) {
         startAngle = difference * index;
       }
-      print("For index $index the angles are start: $startAngle and end: ${startAngle + difference} ");
       canvas.drawArc(rect, startAngle, difference, true, paint);
+      TextSpan span = TextSpan(
+        text: '$index',
+      );
+      TextPainter painter = TextPainter(
+        text: span,
+        textDirection: TextDirection.ltr,
+      );
+      painter.layout();
+      painter.paint(
+          canvas,
+          getOffset(rect.width / 2, rect.height / 2, (rect.width / 2) - 40,
+              startAngle));
     }
+  }
+
+  Offset getOffset(double cx, double cy, double radius, double angle) {
+    double x = cx + radius * cos(angle);
+    double y = cy + radius * sin(angle);
+
+    return Offset(x, y);
   }
 
   @override
