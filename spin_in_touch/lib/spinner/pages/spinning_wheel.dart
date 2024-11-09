@@ -38,26 +38,34 @@ class _SpinningWheelState extends State<SpinningWheel>
     with SingleTickerProviderStateMixin {
   double angleForSpin = 0;
   double speed = 0.1;
-  final double radiansFor360 = 360 * (pi / 180);
+  late double radiansFor360;
   Key repaintKey = Key(Random().nextDouble().toString());
   bool isSpinning = false;
   Ticker? _ticker;
   late AnimationController _controller;
   late Animation<double> _widthAnimation;
+
+
+  double roundToDegreesOfPrecision(int degreeOfPrecision, double doubleToRound){
+    return double.parse( doubleToRound.toStringAsFixed(degreeOfPrecision));
+  }
+
+
   @override
   void initState() {
-    // TODO: implement initState
+    radiansFor360 =  roundToDegreesOfPrecision(4, 360 * (pi / 180));
+
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     );
 
     // Define the animation with the curve 'easeInOut'
-    _widthAnimation = Tween<double>(begin: 0, end: radiansFor360 * 2).animate(
+    _widthAnimation = Tween<double>(begin: 0, end: radiansFor360 * 10).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
     _controller.addListener(() {
-      angleForSpin = _controller.value;
+      angleForSpin = _widthAnimation.value;
       if (_controller.status == AnimationStatus.completed) {
         calculateClosestToCenter();
         print('completed');
@@ -84,7 +92,7 @@ class _SpinningWheelState extends State<SpinningWheel>
             Icons.arrow_drop_down_circle_sharp,
             color: Colors.red,
           )),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
             height: MediaQuery.sizeOf(context).width,
@@ -103,7 +111,7 @@ class _SpinningWheelState extends State<SpinningWheel>
               animation: _widthAnimation,
             ),
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           TextButton(
               onPressed: () {
                 setState(() {
@@ -123,7 +131,7 @@ class _SpinningWheelState extends State<SpinningWheel>
   void calculateClosestToCenter() {
     //first figure out all the pieces degree difference
     //can find out from list of items in list
-    int numberOfPieces = 10;
+    int numberOfPieces = 11;
     // so for a list of 10 items we get 360 / numberOfSections so 36
     double difference = (2 * pi) / numberOfPieces;
     // with 36 degree difference the first's min and max will be 0 to 36 the next will be 36 to 72 and so on
@@ -132,35 +140,32 @@ class _SpinningWheelState extends State<SpinningWheel>
     for (var pieceIndex = 0; pieceIndex < numberOfPieces; pieceIndex++) {
       if (pieceIndex == 0) {
         segements.add(Segement(
-            index: pieceIndex, startRadians: 0, endRadians: difference));
+            index: pieceIndex, startRadians: 0, endRadians:  roundToDegreesOfPrecision(4,difference)));
       } else {
         segements.add(Segement(
             index: pieceIndex,
-            startRadians: difference * pieceIndex,
-            endRadians: difference * (pieceIndex + 1)));
+            startRadians: roundToDegreesOfPrecision(4,  difference * pieceIndex),
+            endRadians: roundToDegreesOfPrecision(4,  difference * (pieceIndex + 1))));
       }
     }
     // increase degree diffence for each by final angle of spin
     // so if angle spun final was 22 radians
     // do degrees / 360 and take modulo from that to then add to min and max of segements
-    print(angleForSpin);
-    double radiansToIncreaseEachSegmentBy = angleForSpin % radiansFor360;
+    double radiansToIncreaseEachSegmentBy = roundToDegreesOfPrecision(4,  angleForSpin % radiansFor360);
     print(radiansToIncreaseEachSegmentBy);
-    List<SegementDifference> segementDifferences = [];
     for (var segement in segements) {
       segement.startRadians += radiansToIncreaseEachSegmentBy;
       segement.endRadians += radiansToIncreaseEachSegmentBy;
 
-      if (segement.startRadians > radiansFor360) {
-        segement.startRadians -= radiansFor360;
-      }
-      if (segement.endRadians > radiansFor360) {
-        segement.endRadians -= radiansFor360;
-      }
-      // print(
-      //     "segment starts at ${segement.startRadians} and ends at ${segement.endRadians}");
+      segement.endRadians = segement.endRadians == radiansFor360 ? segement.endRadians : roundToDegreesOfPrecision(4,  segement.endRadians % radiansFor360);
+      segement.startRadians = segement.startRadians == radiansFor360
+          ? segement.startRadians
+          : roundToDegreesOfPrecision(4,  segement.startRadians % radiansFor360);
+
+      print(
+          "segment ${segement.index} starts at ${segement.startRadians} and ends at ${segement.endRadians}");
     }
-    // print('radiansFor360 $radiansFor360');
+    print('radiansFor360 $radiansFor360');
     Segement? segementThatWon = segements.firstWhere((segement) {
       if (segement.startRadians < segement.endRadians) {
         return segement.startRadians <= radiansFor360 &&
@@ -172,39 +177,10 @@ class _SpinningWheelState extends State<SpinningWheel>
     });
 
     print(segementThatWon.index);
-
     // see which areas are closest to 0/360
   }
 
-  void spinWheel() {
-    if (!isSpinning) {
-      isSpinning = true;
-      _ticker = createTicker((duration) {
-        angleForSpin += speed;
-        setState(() {
-          print(angleForSpin);
-          //simplfy this function to make it more maintainable and changeable
-          if (duration.compareTo(Duration(milliseconds: 1000)) < 0) {
-            speed = 0.2;
-          }
-
-          if (duration.compareTo(Duration(milliseconds: 2000)) == 0 ||
-              duration.compareTo(Duration(milliseconds: 2000)) > 0) {
-            speed = 0;
-            _ticker!.stop();
-            calculateClosestToCenter();
-            _ticker!.dispose();
-            isSpinning = false;
-          }
-
-          // print(angleForSpin);
-          // print(duration);
-        });
-      })
-        ..start();
     }
-  }
-}
 
 class SpinningWheelPage extends StatelessWidget {
   const SpinningWheelPage({super.key});

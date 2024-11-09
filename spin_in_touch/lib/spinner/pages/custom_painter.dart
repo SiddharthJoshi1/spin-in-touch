@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class PieSlicePainter extends CustomPainter {
+  int restartedCount = 0;
   @override
   void paint(Canvas canvas, Size size) {
     // draw circle
@@ -14,22 +15,23 @@ class PieSlicePainter extends CustomPainter {
         center: size.center(Offset.zero),
         height: size.height,
         width: size.width);
-    _drawPieSections(canvas, rect, 10, defaultPaint);
+    _drawPieSections(canvas, rect, 11, defaultPaint);
     print("repainted");
   }
 
   void _drawPieSections(
       Canvas canvas, Rect rect, int numberOfSections, Paint paint) {
     var difference = (2 * pi) / numberOfSections;
-    double startAngle = 0;
+    double startAngle = (3*pi)/2;
     for (var index = 0; index < numberOfSections; index++) {
       paint.color = Color((index * 0.1 * 0xFFFFFF).toInt()).withOpacity(1.0);
       if (index != 0) {
-        startAngle = difference * index;
+        startAngle = difference * index + (3 * pi) / 2;
       }
       canvas.drawArc(rect, startAngle, difference, true, paint);
       TextSpan span = TextSpan(
-        text: '$index',
+        text:  '${index}',
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30, color: Colors.white, backgroundColor: Colors.black)
       );
       TextPainter painter = TextPainter(
         text: span,
@@ -39,7 +41,7 @@ class PieSlicePainter extends CustomPainter {
       painter.paint(
           canvas,
           getOffset(rect.width / 2, rect.height / 2, (rect.width / 2) - 40,
-              startAngle));
+              startAngle + difference/2  ));
     }
   }
 
