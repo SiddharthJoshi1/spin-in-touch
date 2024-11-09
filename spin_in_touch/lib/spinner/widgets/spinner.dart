@@ -18,7 +18,7 @@ class SpinnerWidget extends StatelessWidget {
           SpinnerStatus.loading => const Text(
               'Loading Spinner',
             ),
-          SpinnerStatus.success => SpinningWheelPage(),
+          SpinnerStatus.success => SpinningWheel(spinnerList: state.spinnerList!,),
           SpinnerStatus.failure => Container(
               child: const Text("shite it's f***ed"),
             ),
