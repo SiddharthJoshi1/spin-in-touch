@@ -30,7 +30,9 @@ class SpinnerAppView extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      home: Scaffold(body: Center(child:  SpinnerWidget())),
+      home: Scaffold(
+        appBar: AppBar(centerTitle: true, backgroundColor: Colors.amber, title: Text("Spin in Touch", style: Theme.of(context).textTheme.headlineLarge, )),
+        body: Center(child:  SpinnerWidget())),
     );
   }
 }
