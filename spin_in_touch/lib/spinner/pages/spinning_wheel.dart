@@ -95,8 +95,8 @@ class _SpinningWheelState extends State<SpinningWheel>
           )),
           const SizedBox(height: 10),
           SizedBox(
-            width: 500,
-            height: 500,
+            width: 300,
+            height: 300,
             child: AnimatedBuilder(
               builder: (context, child) {
                 return Transform.rotate(
