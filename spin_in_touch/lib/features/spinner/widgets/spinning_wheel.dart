@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:spin_in_touch/features/spinner/bloc/cubit/spinner_cubit.dart';
 import 'package:spin_in_touch/features/spinner/models/section.dart';
 import 'package:spin_in_touch/features/spinner/utils/spinner_utils.dart';
+import '../../theme/widgets/theme_toggle.dart';
 import 'custom_painter.dart';
 
 class SpinningWheel extends StatefulWidget {
@@ -111,6 +112,7 @@ class _SpinningWheelState extends State<SpinningWheel>
                   )
                 ])
               : const SizedBox.shrink(),
+              ThemeToggle()
         ]);
   }
 
