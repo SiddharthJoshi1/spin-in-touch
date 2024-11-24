@@ -12,19 +12,13 @@ class SpinnerWidget extends StatelessWidget {
     return BlocBuilder<SpinnerCubit, SpinnerState>(
       builder: (context, state) {
         return switch (state.spinnerStatus) {
-          SpinnerStatus.initial => Container(
-              child: const Text("Initial"),
-            ),
+          SpinnerStatus.initial => const Text("Initial"),
           SpinnerStatus.loading => const Text(
               'Loading Spinner',
             ),
-          SpinnerStatus.success => SpinningWheel(spinnerList: state.spinnerList!,),
-          SpinnerStatus.failure => Container(
-              child: const Text("shite it's f***ed"),
-            ),
-          SpinnerStatus.complete => Container(
-              child: const Text("so what'd you win?"),
-            ),
+          SpinnerStatus.success => const SpinningWheel(),
+          SpinnerStatus.failure => const Text("shite it's f***ed"),
+          SpinnerStatus.complete => const Text("so what'd you win?"),
         };
       },
     );

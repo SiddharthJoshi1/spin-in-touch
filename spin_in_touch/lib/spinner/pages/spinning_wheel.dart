@@ -1,33 +1,14 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:spin_in_touch/Domain/Entities/spinner_list.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:spin_in_touch/spinner/bloc/cubit/spinner_cubit.dart';
+import 'package:spin_in_touch/spinner/models/section.dart';
+import 'package:spin_in_touch/spinner/utils/spinner_utils.dart';
 import 'custom_painter.dart';
 
-class Segement {
-  int index;
-  String? value;
-  double startRadians;
-  double endRadians;
-
-  Segement(
-      {this.value,
-      required this.index,
-      required this.startRadians,
-      required this.endRadians});
-}
-
-class SegementDifference {
-  double startRadiansDifference;
-  double endRadiansDifference;
-
-  SegementDifference(
-      {required this.startRadiansDifference,
-      required this.endRadiansDifference});
-}
-
 class SpinningWheel extends StatefulWidget {
-  final SpinnerList spinnerList;
-  const SpinningWheel({super.key, required this.spinnerList});
+  const SpinningWheel({super.key});
 
   @override
   State<SpinningWheel> createState() => _SpinningWheelState();
@@ -39,16 +20,13 @@ class _SpinningWheelState extends State<SpinningWheel>
   late AnimationController _controller;
   late Animation<double> _spinnerAnimation =
       Tween<double>(begin: 0).animate(_controller);
-  Segement? winningSegment;
-
-  double roundToDegreesOfPrecision(
-      int degreeOfPrecision, double doubleToRound) {
-    return double.parse(doubleToRound.toStringAsFixed(degreeOfPrecision));
-  }
+  Section? winningSegment;
+  final SpinnerUtils _spinnerUtils = GetIt.instance<SpinnerUtils>();
 
   @override
   void initState() {
-    radiansFor360 = roundToDegreesOfPrecision(4, 360 * (pi / 180));
+    radiansFor360 =
+        _spinnerUtils.roundToDegreesOfPrecision(4, 360 * (pi / 180));
 
     _controller = AnimationController(
       vsync: this,
@@ -57,7 +35,9 @@ class _SpinningWheelState extends State<SpinningWheel>
 
     _controller.addListener(() {
       if (_controller.status == AnimationStatus.completed) {
-        calculateClosestToCenter();
+        setState(() {
+          winningSegment = calculateClosestToCenter();
+        });
       }
     });
 
@@ -70,20 +50,9 @@ class _SpinningWheelState extends State<SpinningWheel>
     super.dispose();
   }
 
-  void createAnimtionWithRandomEndValue() {
-    int numberOfSpins = Random().nextInt(10);
-    double offsetValue = Random().nextDouble() * 0.9;
-    double randomSpinAmountValue = numberOfSpins + offsetValue;
-    _spinnerAnimation =
-        Tween<double>(begin: 0, end: radiansFor360 * randomSpinAmountValue)
-            .animate(
-      CurvedAnimation(
-          parent: _controller, curve: Curves.easeInOutCubicEmphasized),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final SpinnerState spinnerCubitState = context.read<SpinnerCubit>().state;
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -104,8 +73,9 @@ class _SpinningWheelState extends State<SpinningWheel>
                     child: RepaintBoundary(
                         child: CustomPaint(
                       painter: PieSlicePainter(
-                          numberOfSegments:
-                              widget.spinnerList.spinnerContents.length),
+                          numberOfSections: spinnerCubitState
+                                  .spinnerList?.spinnerContents.length ??
+                              0),
                       // ),
                     )));
               },
@@ -116,7 +86,7 @@ class _SpinningWheelState extends State<SpinningWheel>
           TextButton(
               onPressed: () {
                 setState(() {
-                  createAnimtionWithRandomEndValue();
+                  _spinnerAnimation = _spinnerUtils.createAnimtionWithRandomEndValue(_controller);
                 });
                 _controller.reset();
                 _controller.forward();
@@ -134,7 +104,7 @@ class _SpinningWheelState extends State<SpinningWheel>
                         .titleMedium, // Subtitle style from the theme
                   ),
                   Text(
-                    "${widget.spinnerList.spinnerContents[winningSegment!.index]}",
+                    "${spinnerCubitState.spinnerList?.spinnerContents[winningSegment!.index]}",
                     style: Theme.of(context)
                         .textTheme
                         .titleMedium, // Subtitle style from the theme
@@ -144,73 +114,73 @@ class _SpinningWheelState extends State<SpinningWheel>
         ]);
   }
 
-  List<Segement> _createSegmentsToMirrorUIWheel() {
+  List<Section> _createSegmentsToMirrorUIWheel(SpinnerState spinnerCubitState) {
     //first figure out all the pieces degree difference
     //can find out from list of items in list
-    int numberOfPieces = widget.spinnerList.spinnerContents.length;
+    int numberOfPieces =
+        spinnerCubitState.spinnerList?.spinnerContents.length ?? 0;
     // so for a list of 10 items we get 360 / numberOfSections so 36
     double difference = (2 * pi) / numberOfPieces;
     // with 36 degree difference the first's min and max will be 0 to 36 the next will be 36 to 72 and so on
-    List<Segement> segements = [];
+    List<Section> sections = [];
     // so create a min max list
     for (var pieceIndex = 0; pieceIndex < numberOfPieces; pieceIndex++) {
       if (pieceIndex == 0) {
-        segements.add(Segement(
+        sections.add(Section(
             index: pieceIndex,
             startRadians: 0,
-            endRadians: roundToDegreesOfPrecision(4, difference)));
+            endRadians: _spinnerUtils.roundToDegreesOfPrecision(4, difference)));
       } else {
-        segements.add(Segement(
+        sections.add(Section(
             index: pieceIndex,
-            startRadians: roundToDegreesOfPrecision(4, difference * pieceIndex),
+            startRadians: _spinnerUtils.roundToDegreesOfPrecision(4, difference * pieceIndex),
             endRadians:
-                roundToDegreesOfPrecision(4, difference * (pieceIndex + 1))));
+                _spinnerUtils.roundToDegreesOfPrecision(4, difference * (pieceIndex + 1))));
       }
     }
-    return segements;
+    return sections;
   }
 
-  List<Segement> _incrementEachSegmentWithNewSpinValue(
-      List<Segement> oldSegments) {
+  List<Section> _incrementEachSegmentWithNewSpinValue(
+      List<Section> oldSegments) {
     // increase degree diffence for each by final angle of spin
     // so if angle spun final was 22 radians
-    // do degrees / 360 and take modulo from that to then add to min and max of segements
+    // do degrees / 360 and take modulo from that to then add to min and max of sections
     double radiansToIncreaseEachSegmentBy =
-        roundToDegreesOfPrecision(4, _spinnerAnimation.value % radiansFor360);
-    for (var segement in oldSegments) {
-      segement.startRadians += radiansToIncreaseEachSegmentBy;
-      segement.endRadians += radiansToIncreaseEachSegmentBy;
+        _spinnerUtils
+        .roundToDegreesOfPrecision(4, _spinnerAnimation.value % radiansFor360);
+    for (var section in oldSegments) {
+      section.startRadians += radiansToIncreaseEachSegmentBy;
+      section.endRadians += radiansToIncreaseEachSegmentBy;
 
-      segement.endRadians = segement.endRadians == radiansFor360
-          ? segement.endRadians
-          : roundToDegreesOfPrecision(4, segement.endRadians % radiansFor360);
-      segement.startRadians = segement.startRadians == radiansFor360
-          ? segement.startRadians
-          : roundToDegreesOfPrecision(4, segement.startRadians % radiansFor360);
+      section.endRadians = section.endRadians == radiansFor360
+          ? section.endRadians
+          : _spinnerUtils.roundToDegreesOfPrecision(4, section.endRadians % radiansFor360);
+      section.startRadians = section.startRadians == radiansFor360
+          ? section.startRadians
+          : _spinnerUtils.roundToDegreesOfPrecision(4, section.startRadians % radiansFor360);
     }
     return oldSegments;
   }
 
-  Segement _findWinningSegment(List<Segement> segements) {
-    Segement? segementThatWon = segements.firstWhere((segement) {
-      if (segement.startRadians < segement.endRadians) {
-        return segement.startRadians <= radiansFor360 &&
-            radiansFor360 <= segement.endRadians;
+  Section _findWinningSegment(List<Section> sections) {
+    Section? sectionThatWon = sections.firstWhere((section) {
+      if (section.startRadians < section.endRadians) {
+        return section.startRadians <= radiansFor360 &&
+            radiansFor360 <= section.endRadians;
       } else {
-        return segement.startRadians <= radiansFor360 ||
-            radiansFor360 <= segement.endRadians;
+        return section.startRadians <= radiansFor360 ||
+            radiansFor360 <= section.endRadians;
       }
     });
-    return segementThatWon;
+    return sectionThatWon;
   }
 
-  void calculateClosestToCenter() {
-    List<Segement> segements = _createSegmentsToMirrorUIWheel();
-    List<Segement> newSegments =
-        _incrementEachSegmentWithNewSpinValue(segements);
+  Section calculateClosestToCenter() {
+    List<Section> sections =
+        _createSegmentsToMirrorUIWheel(context.read<SpinnerCubit>().state);
+    List<Section> newSegments = _incrementEachSegmentWithNewSpinValue(sections);
 
-    setState(() {
-      winningSegment = _findWinningSegment(newSegments);
-    });
+    return _findWinningSegment(newSegments);
   }
 }

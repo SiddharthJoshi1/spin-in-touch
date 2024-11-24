@@ -2,10 +2,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class PieSlicePainter extends CustomPainter {
-  final int numberOfSegments;
+  final int numberOfSections;
   int restartedCount = 0;
 
-  PieSlicePainter({super.repaint, required this.numberOfSegments});
+  PieSlicePainter({super.repaint, required this.numberOfSections});
   @override
   void paint(Canvas canvas, Size size) {
     // draw circle
@@ -16,7 +16,7 @@ class PieSlicePainter extends CustomPainter {
         center: size.center(Offset.zero),
         height: size.height,
         width: size.width);
-    _drawPieSections(canvas, rect, numberOfSegments, defaultPaint);
+    _drawPieSections(canvas, rect, numberOfSections, defaultPaint);
     print("repainted");
   }
 

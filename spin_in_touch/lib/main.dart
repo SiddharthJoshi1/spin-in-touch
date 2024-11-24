@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:spin_in_touch/Data/sources/local_file.dart';
-import 'package:spin_in_touch/Data/spinner_repository_impl.dart';
+import 'package:get_it/get_it.dart';
+import 'package:spin_in_touch/Domain/Repos/spinner_repository.dart';
 import 'package:spin_in_touch/app.dart';
+import 'package:spin_in_touch/dependency_injection.dart';
 
 void main() {
-  LocalFileJSONParserImpl localFileJSONParserImpl = LocalFileJSONParserImpl();
-
+  DependencyInjection();
   runApp(MyApp(
-    spinnerRepository:
-        SpinnerRepositoryImpl(localFileJSONParser: localFileJSONParserImpl),
+    spinnerRepository: GetIt.instance<SpinnerRepository>()
   ));
 }

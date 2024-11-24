@@ -8,18 +8,18 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key, required this.spinnerRepository});
 
   final SpinnerRepository spinnerRepository;
-  
+
   @override
   Widget build(BuildContext context) {
-     return BlocProvider(
+    return BlocProvider(
       create: (_) => SpinnerCubit(spinnerRepository)..fetchSpinnerContents(),
-      child: SpinnerAppView(),
+      child: const SpinnerAppView(),
     );
   }
-
 }
 
 class SpinnerAppView extends StatelessWidget {
+  const SpinnerAppView({super.key});
 
   // This widget is the root of your application.
   @override
@@ -31,8 +31,14 @@ class SpinnerAppView extends StatelessWidget {
         useMaterial3: true,
       ),
       home: Scaffold(
-        appBar: AppBar(centerTitle: true, backgroundColor: Colors.amber, title: Text("Spin in Touch", style: Theme.of(context).textTheme.headlineLarge, )),
-        body: Center(child:  SpinnerWidget())),
+          appBar: AppBar(
+              centerTitle: true,
+              backgroundColor: Colors.amber,
+              title: Text(
+                "Spin in Touch",
+                style: Theme.of(context).textTheme.headlineLarge,
+              )),
+          body: const Center(child: SpinnerWidget())),
     );
   }
 }
