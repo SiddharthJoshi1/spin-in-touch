@@ -2,7 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:spin_in_touch/Data/sources/local_file.dart';
 import 'package:spin_in_touch/Data/spinner_repository_impl.dart';
 import 'package:spin_in_touch/Domain/Repos/spinner_repository.dart';
-import 'package:spin_in_touch/spinner/utils/spinner_utils.dart';
+import 'package:spin_in_touch/features/spinner/utils/spinner_utils.dart';
 
 class DependencyInjection {
   final GetIt _getIt = GetIt.instance;

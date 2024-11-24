@@ -1,27 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:spin_in_touch/Domain/Repos/spinner_repository.dart';
-import 'package:spin_in_touch/spinner/bloc/cubit/spinner_cubit.dart';
-import 'package:spin_in_touch/spinner/widgets/spinner.dart';
+import 'package:spin_in_touch/home_page.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.spinnerRepository});
+  const MyApp({super.key});
 
-  final SpinnerRepository spinnerRepository;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => SpinnerCubit(spinnerRepository)..fetchSpinnerContents(),
-      child: const SpinnerAppView(),
-    );
-  }
-}
-
-class SpinnerAppView extends StatelessWidget {
-  const SpinnerAppView({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -30,15 +14,7 @@ class SpinnerAppView extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      home: Scaffold(
-          appBar: AppBar(
-              centerTitle: true,
-              backgroundColor: Colors.amber,
-              title: Text(
-                "Spin in Touch",
-                style: Theme.of(context).textTheme.headlineLarge,
-              )),
-          body: const Center(child: SpinnerWidget())),
+      home: HomePage(spinnerRepository: GetIt.instance<SpinnerRepository>(),)
     );
   }
 }

@@ -2,9 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:spin_in_touch/spinner/bloc/cubit/spinner_cubit.dart';
-import 'package:spin_in_touch/spinner/models/section.dart';
-import 'package:spin_in_touch/spinner/utils/spinner_utils.dart';
+import 'package:spin_in_touch/features/spinner/bloc/cubit/spinner_cubit.dart';
+import 'package:spin_in_touch/features/spinner/models/section.dart';
+import 'package:spin_in_touch/features/spinner/utils/spinner_utils.dart';
 import 'custom_painter.dart';
 
 class SpinningWheel extends StatefulWidget {

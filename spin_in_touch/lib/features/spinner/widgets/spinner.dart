@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:spin_in_touch/spinner/bloc/cubit/spinner_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spin_in_touch/features/spinner/bloc/cubit/spinner_cubit.dart';
 
 import '../pages/spinning_wheel.dart';
 
